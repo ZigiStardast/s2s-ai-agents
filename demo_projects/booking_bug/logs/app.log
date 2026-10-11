@@ -1,0 +1,3 @@
+2026-09-20T10:00:01Z INFO booking confirmation sent student=ana event=python-day
+2026-09-20T10:00:02Z INFO booking lookup student=ana event=python-day result_count=0
+2026-09-20T10:02:11Z INFO booking confirmation sent student=marko event=agents-day

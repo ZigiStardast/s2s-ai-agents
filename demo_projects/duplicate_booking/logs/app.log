@@ -1,0 +1,3 @@
+2026-09-25T14:20:01Z INFO booking confirmed student=marko event=agents-day
+2026-09-25T14:20:02Z WARN duplicate booking prevention returned no match student=marko event=agents-day
+2026-09-25T14:20:02Z INFO booking confirmed student=marko event=agents-day
