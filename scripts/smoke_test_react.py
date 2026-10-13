@@ -16,8 +16,8 @@ def main() -> int:
         print("FAIL: za ovaj smoke test podesite API ključ i AGENT_MODE=live.")
         return 1
     try:
-        from src.agent import investigate
-        result = investigate("booking_bug", "Find evidence about the booking issue.", settings)
+        from src.agent import run_agent
+        result = run_agent("booking_bug", "Find evidence about the booking issue.", settings)
         if not result.root_cause:
             print("FAIL: ReAct nije vratio root cause.")
             return 1

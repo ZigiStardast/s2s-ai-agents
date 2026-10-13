@@ -1,52 +1,46 @@
-"""Mali formatter za javno vidljivu agentovu execution trajectory."""
+"""Mali izolovani formatter za javno vidljivu execution trajectory."""
 
 from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass
-from typing import Any
 
 
-@dataclass
-class ToolEvent:
-    """Jedan vidljivi korak: alat, argumenti i opažanje."""
-
-    step: int
-    tool: str
-    arguments: Any
-    observation: str
-
-
-def _argument_text(value: Any) -> Any:
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            return value
-    return value
-
-
-def events_from_trajectory(trajectory: Any) -> list[ToolEvent]:
-    """Najbolje-effort čitanje javnog DSPy trajectory formata."""
+def trajectory_events(trajectory: object) -> list[dict[str, object]]:
+    """Pretvori DSPy javnu trajectory u jednostavne korake za prikaz."""
 
     if not isinstance(trajectory, dict):
         return []
-    events: list[ToolEvent] = []
-    names = {}
-    for key, value in trajectory.items():
+
+    events: list[dict[str, object]] = []
+    tool_numbers = []
+    for key in trajectory:
         match = re.match(r"tool_name_(\d+)$", str(key))
         if match:
-            names[int(match.group(1))] = value
-    for number in sorted(names):
-        arguments = trajectory.get(f"tool_args_{number}", trajectory.get(f"tool_arguments_{number}", {}))
-        observation = trajectory.get(f"observation_{number}", "")
-        events.append(ToolEvent(number, str(names[number]), _argument_text(arguments), str(observation)))
+            tool_numbers.append(int(match.group(1)))
+
+    for number in sorted(tool_numbers):
+        arguments = trajectory.get(
+            f"tool_args_{number}", trajectory.get(f"tool_arguments_{number}", {})
+        )
+        if isinstance(arguments, str):
+            try:
+                arguments = json.loads(arguments)
+            except json.JSONDecodeError:
+                pass
+        events.append(
+            {
+                "step": number,
+                "tool": str(trajectory[f"tool_name_{number}"]),
+                "arguments": arguments,
+                "observation": str(trajectory.get(f"observation_{number}", "")),
+            }
+        )
     return events
 
 
-def format_trace(events: list[ToolEvent]) -> str:
-    """Formatiraj kratku trace poruku za početnike."""
+def format_trace(events: list[dict[str, object]]) -> str:
+    """Formatiraj samo ono što studenti treba da vide: alat i observation."""
 
     lines = ["=== AGENT EXECUTION TRACE ===", ""]
     if not events:
@@ -54,11 +48,11 @@ def format_trace(events: list[ToolEvent]) -> str:
     for event in events:
         lines.extend(
             [
-                f"Step {event.step}",
-                f"Tool: {event.tool}",
-                f"Arguments: {json.dumps(event.arguments, ensure_ascii=False)}",
+                f"Step {event['step']}",
+                f"Tool: {event['tool']}",
+                f"Arguments: {json.dumps(event['arguments'], ensure_ascii=False)}",
                 "Observation:",
-                event.observation[:2_000],
+                str(event["observation"])[:2_000],
                 "",
             ]
         )

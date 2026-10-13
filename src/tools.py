@@ -1,4 +1,4 @@
-"""Četiri read-only alata koje agent sme da koristi nad izabranim scenarijem."""
+"""Četiri read-only Python funkcije koje agent sme da koristi."""
 
 from __future__ import annotations
 
@@ -20,29 +20,7 @@ def set_scenario(scenario: str) -> None:
     _selected_scenario = scenario_path(scenario)
 
 
-def _scenario() -> Path:
-    if _selected_scenario is None:
-        raise RuntimeError("Scenario nije izabran. Prvo pozovite set_scenario().")
-    return _selected_scenario
-
-
-def _safe_relative_path(path: str) -> Path:
-    """Validiraj relativnu tekstualnu putanju unutar scenarija."""
-
-    candidate_text = str(path).strip()
-    candidate = Path(candidate_text)
-    if not candidate_text or candidate.is_absolute() or ".." in candidate.parts:
-        raise ValueError("Dozvoljene su samo relativne putanje bez '..'.")
-    if candidate.name == ".env" or ".env" in candidate.parts:
-        raise ValueError(".env nije dozvoljen za čitanje.")
-    if candidate.suffix.lower() not in _ALLOWED_EXTENSIONS:
-        raise ValueError("Dozvoljen je samo poznat tekstualni tip fajla.")
-    root = _scenario().resolve()
-    resolved = (root / candidate).resolve()
-    if root != resolved and root not in resolved.parents:
-        raise ValueError("Putanja mora ostati unutar izabranog scenarija.")
-    return resolved
-
+# ----- ALATI KOJE AGENT SME DA KORISTI -----
 
 def list_files() -> str:
     """Listaj dozvoljene tekstualne fajlove izabranog demo scenarija."""
@@ -99,3 +77,28 @@ def search_logs(query: str) -> str:
                 if len(matches) >= 20:
                     return "\n".join(matches)
     return "\n".join(matches) or "Nema pronađenih log linija."
+
+
+# Bezbednosni detalji su ispod četiri funkcije koje se objašnjavaju na času.
+def _scenario() -> Path:
+    if _selected_scenario is None:
+        raise RuntimeError("Scenario nije izabran. Prvo pozovite set_scenario().")
+    return _selected_scenario
+
+
+def _safe_relative_path(path: str) -> Path:
+    """Validiraj relativnu tekstualnu putanju unutar scenarija."""
+
+    candidate_text = str(path).strip()
+    candidate = Path(candidate_text)
+    if not candidate_text or candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError("Dozvoljene su samo relativne putanje bez '..'.")
+    if candidate.name == ".env" or ".env" in candidate.parts:
+        raise ValueError(".env nije dozvoljen za čitanje.")
+    if candidate.suffix.lower() not in _ALLOWED_EXTENSIONS:
+        raise ValueError("Dozvoljen je samo poznat tekstualni tip fajla.")
+    root = _scenario().resolve()
+    resolved = (root / candidate).resolve()
+    if root != resolved and root not in resolved.parents:
+        raise ValueError("Putanja mora ostati unutar izabranog scenarija.")
+    return resolved

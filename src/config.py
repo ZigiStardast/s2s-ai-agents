@@ -26,11 +26,11 @@ class Settings:
     max_iters: int = 3
 
 
-def load_settings() -> Settings:
+def load_settings(mode_override: str | None = None) -> Settings:
     """Učitaj `.env` i vrati mala, čitljiva podešavanja."""
 
     load_dotenv(PROJECT_ROOT / ".env")
-    mode = os.getenv("AGENT_MODE", "live").strip().lower()
+    mode = (mode_override or os.getenv("AGENT_MODE", "live")).strip().lower()
     if mode not in {"live", "mock"}:
         mode = "live"
     return Settings(
