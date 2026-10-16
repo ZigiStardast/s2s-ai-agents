@@ -25,7 +25,7 @@ def main() -> int:
         return 0
     except Exception as error:
         print(f"OpenRouter nije dostupan: {error}")
-        print("Podesite AGENT_MODE=mock ili OPENROUTER_API_KEY.")
+        print("Podesite AGENT_MODE=mock ili API ključ u .env.")
         return 1
 
 

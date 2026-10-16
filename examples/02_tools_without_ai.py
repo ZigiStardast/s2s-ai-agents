@@ -15,7 +15,7 @@ def main() -> None:
     print("FILES\n", list_files())
     print("\nBOOKING SOURCE\n", read_file("app/booking.py"))
     print("\nTESTS\n", run_tests())
-    print("\nLOG SEARCH\n", search_logs("booking"))
+    print("\nLOG SEARCH\n", search_logs("confirmed"))
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ class Settings:
     model: str
     api_key: str
     max_iters: int = 3
+    provider: str = "openrouter"
 
 
 def load_settings(mode_override: str | None = None) -> Settings:
@@ -33,10 +34,19 @@ def load_settings(mode_override: str | None = None) -> Settings:
     mode = (mode_override or os.getenv("AGENT_MODE", "live")).strip().lower()
     if mode not in {"live", "mock"}:
         mode = "live"
+    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if openai_key:
+        return Settings(
+            mode=mode,
+            model=os.getenv("OPENAI_MODEL", "gpt-5.5").strip(),
+            api_key=openai_key,
+            provider="openai",
+        )
     return Settings(
         mode=mode,
         model=os.getenv("OPENROUTER_MODEL", "openrouter/free").strip(),
         api_key=os.getenv("OPENROUTER_API_KEY", "").strip(),
+        provider="openrouter",
     )
 
 
@@ -52,24 +62,35 @@ def scenario_path(scenario: str) -> Path:
 
 
 def configure_dspy(settings: Settings) -> None:
-    """Konfiguriši DSPy za OpenRouter preko OpenAI-kompatibilnog endpoint-a."""
+    """Konfiguriši DSPy za OpenAI ili OpenRouter."""
 
     if not settings.api_key:
         raise RuntimeError(
-            "OPENROUTER_API_KEY nedostaje. Dodajte ga u .env ili koristite AGENT_MODE=mock."
+            "API ključ nedostaje. Dodajte OPENAI_API_KEY ili OPENROUTER_API_KEY u .env, "
+            "ili koristite AGENT_MODE=mock."
         )
 
     import dspy
 
-    model_name = settings.model
-    # DSPy uses the provider prefix; the part after it is the OpenRouter model ID.
-    if not model_name.startswith("openai/"):
-        model_name = f"openai/{model_name}"
-    lm = dspy.LM(
-        model_name,
-        api_base="https://openrouter.ai/api/v1",
-        api_key=settings.api_key,
-        temperature=0.2,
-        max_tokens=700,
-    )
+    if settings.provider == "openai":
+        model_name = settings.model
+        if not model_name.startswith("openai/"):
+            model_name = f"openai/{model_name}"
+        lm = dspy.LM(
+            model_name,
+            api_key=settings.api_key,
+            temperature=1.0,
+            max_tokens=16000,
+        )
+    else:
+        model_name = settings.model
+        if not model_name.startswith("openai/"):
+            model_name = f"openai/{model_name}"
+        lm = dspy.LM(
+            model_name,
+            api_base="https://openrouter.ai/api/v1",
+            api_key=settings.api_key,
+            temperature=0.2,
+            max_tokens=4000,
+        )
     dspy.configure(lm=lm)

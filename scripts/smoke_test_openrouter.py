@@ -12,8 +12,8 @@ from src.config import configure_dspy, load_settings
 
 def main() -> int:
     settings = load_settings()
-    if not settings.api_key:
-        print("FAIL: OPENROUTER_API_KEY nije podešen.")
+    if settings.provider != "openrouter" or not settings.api_key:
+        print("FAIL: OPENROUTER_API_KEY nije podešen za OpenRouter smoke test.")
         return 1
     try:
         import dspy

@@ -13,7 +13,7 @@ from src.config import configure_dspy, load_settings
 def main() -> None:
     settings = load_settings()
     if settings.mode == "mock" or not settings.api_key:
-        print("Preskačem live DSPy poziv: podesite OPENROUTER_API_KEY i AGENT_MODE=live.")
+        print("Preskačem live DSPy poziv: podesite API ključ i AGENT_MODE=live.")
         return
     import dspy
     from src.signatures import SummarizeIssue
