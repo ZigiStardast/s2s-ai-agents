@@ -30,7 +30,7 @@ def main() -> None:
     # PRIMER 1 — PITANJE -> ODGOVOR
     # ============================================================
     qa = dspy.Predict("question -> answer")
-    result = qa(question="Koliko nogu ima mačka?")
+    result = qa(question="Koliko mačor ima nogu?")
 
     # "question" je ulazno polje.
     # "answer" je izlazno polje.

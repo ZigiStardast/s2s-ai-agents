@@ -68,23 +68,25 @@ def run_agent(scenario: str, issue: str, settings: Settings) -> InvestigationRes
     tools.set_scenario(scenario)
     if settings.mode == "mock":
         return run_mock_agent(scenario)
-
+    
     configure_dspy(settings)
+    
     import dspy
     from .signatures import InvestigateIssue
-
-    # Signature, alati, granica i poziv agenta su namerno na jednom mestu.
+    
     agent = dspy.ReAct(
         InvestigateIssue,
-        tools=[
+        tools = [
             tools.list_files,
             tools.read_file,
             tools.run_tests,
             tools.search_logs,
         ],
-        max_iters=settings.max_iters,
+        max_iters=3
     )
+    
     prediction = agent(issue=issue)
+    
     return InvestigationResult(
         root_cause=str(getattr(prediction, "root_cause", "")),
         evidence=str(getattr(prediction, "evidence", "")),
